@@ -4,6 +4,18 @@ This repository contains my custom docker images.
 
 ## Images
 
+### iventoy
+
+PXE server for network booting ISO images.
+
+```
+docker pull ghcr.io/antrv/iventoy:1.0.25
+```
+
+No environment variables — configured entirely through the web UI on port `26000`. Mount `/opt/iventoy/iso` as a volume to provide ISO images.
+
+---
+
 ### samba
 
 SMB file server. Supports multiple users and shared directories, all configurable via environment variables.
@@ -42,21 +54,6 @@ docker pull ghcr.io/antrv/samba:latest
 
 ---
 
-### wsdd2
-
-WS-Discovery daemon that makes the Samba server visible in Windows network neighborhood.
-
-```
-docker pull ghcr.io/antrv/wsdd2:latest
-```
-
-| Variable | Default | Description |
-|---|---|---|
-| `MACHINENAME` | `SERVER` | Machine name announced on the network |
-| `WORKGROUP` | `WORKGROUP` | Workgroup name |
-
----
-
 ### softethervpn
 
 SoftEther VPN server compiled from source.
@@ -73,15 +70,18 @@ Config files (`vpn_server.config`, `vpn_client.config`, `vpn_bridge.config`) are
 
 ---
 
-### iventoy
+### wsdd2
 
-PXE server for network booting ISO images.
+WS-Discovery daemon that makes the Samba server visible in Windows network neighborhood.
 
 ```
-docker pull ghcr.io/antrv/iventoy:1.0.25
+docker pull ghcr.io/antrv/wsdd2:latest
 ```
 
-No environment variables — configured entirely through the web UI on port `26000`. Mount `/opt/iventoy/iso` as a volume to provide ISO images.
+| Variable | Default | Description |
+|---|---|---|
+| `MACHINENAME` | `SERVER` | Machine name announced on the network |
+| `WORKGROUP` | `WORKGROUP` | Workgroup name |
 
 ---
 
