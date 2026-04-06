@@ -85,6 +85,8 @@ for i in $(seq 1 100); do
         echo "write list = $share_write_list"
         echo "read only = $share_read_only"
         echo "browseable = $share_browseable"
+        echo "oplocks = False"
+        echo "level2 oplocks = False"
         echo
     } >> "$template_file"
 
