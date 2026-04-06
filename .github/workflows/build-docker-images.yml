@@ -1,0 +1,109 @@
+name: Build and Publish Docker Images
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "images/**"
+      - ".github/workflows/build-docker-images.yml"
+  workflow_dispatch:
+
+permissions:
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGES_PATH: images
+
+jobs:
+  # ── Job 1: Detect which images have changed ──────────────────────────────
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed image directories
+        id: set-matrix
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            CHANGED=$(find ${{ env.IMAGES_PATH }} -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | jq -Rc . | jq -sc .)
+          else
+            CHANGED=$(git diff --name-only HEAD^ HEAD \
+              | grep '^${{ env.IMAGES_PATH }}/' \
+              | sed 's|^${{ env.IMAGES_PATH }}/||' \
+              | cut -d/ -f1 \
+              | sort -u \
+              | jq -Rc . | jq -sc .)
+          fi
+
+          if [ "$CHANGED" = "[]" ] || [ -z "$CHANGED" ]; then
+            CHANGED=$(find ${{ env.IMAGES_PATH }} -maxdepth 1 -mindepth 1 -type d -exec basename {} \; | jq -Rc . | jq -sc .)
+          fi
+
+          echo "Images to build: $CHANGED"
+          echo "matrix={\"image\":$CHANGED}" >> "$GITHUB_OUTPUT"
+
+  # ── Job 2: Build and push each image in parallel ─────────────────────────
+  build-push:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.matrix != '{"image":[]}' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.detect-changes.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify Dockerfile exists
+        run: |
+          if [ ! -f "${{ env.IMAGES_PATH }}/${{ matrix.image }}/Dockerfile" ]; then
+            echo "No Dockerfile found in ${{ env.IMAGES_PATH }}/${{ matrix.image }}, skipping."
+            exit 1
+          fi
+
+      - name: Read image metadata
+        id: read-meta
+        run: |
+          DOCKERFILE="${{ env.IMAGES_PATH }}/${{ matrix.image }}/Dockerfile"
+          IMAGE_TAG=$(grep -m1 '^ARG IMAGE_TAG=' "$DOCKERFILE" | cut -d= -f2 | tr -d '[:space:]')
+          IMAGE_PLATFORMS=$(grep -m1 '^ARG IMAGE_PLATFORMS=' "$DOCKERFILE" | cut -d= -f2 | tr -d '[:space:]')
+          [ -n "$IMAGE_TAG" ] && echo "IMAGE_TAG=$IMAGE_TAG" >> "$GITHUB_ENV"
+          echo "Tag: ${IMAGE_TAG:-latest}"
+          echo "Platforms: ${IMAGE_PLATFORMS:-linux/amd64,linux/arm64}"
+          echo "image_tag=${IMAGE_TAG:-latest}" >> "$GITHUB_OUTPUT"
+          echo "image_platforms=${IMAGE_PLATFORMS:-linux/amd64,linux/arm64}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: ${{ steps.read-meta.outputs.image_platforms }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Build and push ${{ matrix.image }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.IMAGES_PATH }}/${{ matrix.image }}
+          file: ${{ env.IMAGES_PATH }}/${{ matrix.image }}/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.actor }}/${{ matrix.image }}:${{ steps.read-meta.outputs.image_tag }}
+          build-args: IMAGE_TAG=${{ steps.read-meta.outputs.image_tag }}
+          platforms: ${{ steps.read-meta.outputs.image_platforms }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ github.actor }}/${{ matrix.image }}:${{ steps.read-meta.outputs.image_tag }}
+          cache-to: type=inline
