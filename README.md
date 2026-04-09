@@ -16,6 +16,24 @@ No environment variables — configured entirely through the web UI on port `260
 
 ---
 
+### minidlna
+
+UPnP/DLNA media server that streams media files to devices on the local network.
+
+```
+docker pull ghcr.io/antrv/minidlna:latest
+```
+
+| Variable | Default | Description |
+|---|---|---|
+| `FRIENDLY_NAME` | `Media Server` | Server name announced on the network |
+| `PUID` | `1000` | UID the daemon runs as |
+| `PGID` | `100` | GID the daemon runs as |
+
+Mount media directories under `/opt` as volumes. Exposes port `1900/udp` (SSDP discovery) and `8200/tcp` (HTTP media streaming).
+
+---
+
 ### samba
 
 SMB file server. Supports multiple users and shared directories, all configurable via environment variables.
@@ -82,6 +100,12 @@ docker pull ghcr.io/antrv/wsdd2:latest
 |---|---|---|
 | `MACHINENAME` | `SERVER` | Machine name announced on the network |
 | `WORKGROUP` | `WORKGROUP` | Workgroup name |
+
+---
+
+## Examples
+
+The `examples/` directory contains Docker Compose file examples for running the images.
 
 ---
 
