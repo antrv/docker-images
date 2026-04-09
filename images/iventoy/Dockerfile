@@ -10,8 +10,11 @@ ADD https://github.com/ventoy/PXE/releases/download/v$IVENTOY_VER/iventoy-$IVENT
 RUN tar -xf /tmp/iventoy.tar.gz -C /opt
 RUN mv /opt/iventoy-$IVENTOY_VER /opt/iventoy
 
+COPY entrypoint.sh /opt/iventoy/entrypoint.sh
+RUN chmod +x /opt/iventoy/entrypoint.sh
+
 VOLUME /opt/iventoy/iso
 
 EXPOSE 68/udp 69/udp 10809/tcp 16000/tcp 26000/tcp
 
-ENTRYPOINT ["bash", "-c", "cd /opt/iventoy && ./iventoy.sh -R start && sleep 5 && tail -f log/log.txt"]
+ENTRYPOINT ["/opt/iventoy/entrypoint.sh"]
