@@ -9,6 +9,6 @@ RUN chmod +x /usr/sbin/smb_run.sh
 
 VOLUME /shares/data /shares/home
 
-EXPOSE 445/tcp 5335/tcp 5335/udp
+EXPOSE 445/tcp
 
 ENTRYPOINT ["sh", "-c", "/usr/sbin/smb_run.sh"]
