@@ -4,7 +4,10 @@ ARG IMAGE_TAG=1.0.25
 ARG IMAGE_PLATFORMS=linux/amd64
 ARG IVENTOY_VER=$IMAGE_TAG
 
-RUN DEBIAN_FRONTEND=noninteractive apt update && apt upgrade -y && rm -rf /var/lib/apt/lists/*
+RUN DEBIAN_FRONTEND=noninteractive apt update && \
+    apt upgrade -y && \
+    apt install -y --no-install-recommends procps && \
+    rm -rf /var/lib/apt/lists/*
 
 ADD https://github.com/ventoy/PXE/releases/download/v$IVENTOY_VER/iventoy-$IVENTOY_VER-linux-free.tar.gz /tmp/iventoy.tar.gz
 RUN tar -xf /tmp/iventoy.tar.gz -C /opt
