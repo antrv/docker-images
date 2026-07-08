@@ -1,5 +1,7 @@
 FROM alpine
 
+ARG IMAGE_TAG=1.0.0
+
 RUN apk upgrade --no-cache && apk add --no-cache samba
 
 COPY smb_run.sh /usr/sbin

@@ -1,5 +1,7 @@
 FROM alpine
 
+ARG IMAGE_TAG=1.0.0
+
 RUN apk --no-cache upgrade && apk --no-cache add minidlna
 
 COPY minidlna_run.sh /usr/sbin
