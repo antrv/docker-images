@@ -1,5 +1,7 @@
 FROM alpine AS wsdd2-build
 
+ARG IMAGE_TAG=1.0.0
+
 RUN apk upgrade
 RUN apk add binutils gcc make build-base readline-dev openssl-dev ncurses-dev make gnu-libiconv zlib-dev musl-dev linux-headers git
 
