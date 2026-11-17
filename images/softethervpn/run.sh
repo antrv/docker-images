@@ -39,13 +39,15 @@ fi
 
 # Cleanup function for trap
 cleanup() {
+	# Stop the server and wait for its final config writes before copying.
+	kill "$VPN_PID" 2>/dev/null || true
+	wait "$VPN_PID" || true
+
 	for cfg in $CONFIG_FILES; do
 		if [ -f "$INSTALL_DIR/$cfg" ]; then
 			cp "$INSTALL_DIR/$cfg" "$CONFIG_DIR/"
 		fi
 	done
-	kill $VPN_PID
-	wait $VPN_PID
 	exit
 }
 

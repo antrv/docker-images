@@ -9,7 +9,7 @@ This repository contains my custom docker images.
 PXE server for network booting ISO images.
 
 ```
-docker pull ghcr.io/antrv/iventoy:1.0.25
+docker pull ghcr.io/antrv/iventoy:1.0.50
 ```
 
 No environment variables — configured entirely through the web UI on port `26000`. Mount `/opt/iventoy/iso` as a volume to provide ISO images.
@@ -38,37 +38,7 @@ Mount media directories under `/opt` as volumes. Exposes port `1900/udp` (SSDP d
 
 SMB file server. Supports multiple users and shared directories, all configurable via environment variables.
 
-```
-docker pull ghcr.io/antrv/samba:latest
-```
-
-**Server**
-
-| Variable | Default | Description |
-|---|---|---|
-| `WORKGROUP` | `HOME` | Workgroup name |
-| `MACHINENAME` | `FILES` | NetBIOS name |
-| `MACHINETITLE` | `File Server` | Server description string |
-
-**Users** (repeat for N = 1, 2, 3, …)
-
-| Variable | Default | Description |
-|---|---|---|
-| `USER{N}_NAME` | — | Username |
-| `USER{N}_UID` | — | UID (optional) |
-| `USER{N}_PASSWORD` | — | Password |
-| `USER{N}_PASSWORD_FILE` | — | Path to a file containing the password (alternative to `USER{N}_PASSWORD`) |
-
-**Shares** (repeat for N = 1, 2, 3, …)
-
-| Variable | Default | Description |
-|---|---|---|
-| `SHARE{N}_NAME` | — | Share name |
-| `SHARE{N}_PATH` | — | Path inside the container |
-| `SHARE{N}_COMMENT` | share name | Description shown to clients |
-| `SHARE{N}_BROWSEABLE` | `yes` | Whether the share is visible when browsing |
-| `SHARE{N}_READ_ONLY` | `yes` | Set to `no` to allow writes for all users |
-| `SHARE{N}_WRITE_LIST` | `@users` | Users or groups with write access |
+[Documentation](docs/samba.md)
 
 ---
 
@@ -101,11 +71,15 @@ docker pull ghcr.io/antrv/wsdd2:latest
 | `MACHINENAME` | `SERVER` | Machine name announced on the network |
 | `WORKGROUP` | `WORKGROUP` | Workgroup name |
 
+See the [Samba and WS-Discovery Compose guide](docs/samba-compose.md) for a complete deployment example.
+
 ---
 
 ## Examples
 
 The `examples/` directory contains Docker Compose file examples for running the images.
+
+See the [Samba and WS-Discovery Compose guide](docs/samba-compose.md) for a complete file server setup.
 
 ---
 
