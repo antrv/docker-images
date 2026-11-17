@@ -11,7 +11,6 @@ RUN DEBIAN_FRONTEND=noninteractive apt update && \
 
 ADD https://github.com/ventoy/PXE/releases/download/v$IVENTOY_VER/iventoy-$IVENTOY_VER-linux-x86_64-free.tar.gz /tmp/iventoy.tar.gz
 RUN tar -xf /tmp/iventoy.tar.gz -C /opt
-RUN mv /opt/iventoy-$IVENTOY_VER /opt/iventoy
 
 COPY entrypoint.sh /opt/iventoy/entrypoint.sh
 RUN chmod +x /opt/iventoy/entrypoint.sh
